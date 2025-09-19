@@ -54,7 +54,7 @@ check_prerequisites() {
     fi
 
     # 检查Docker Compose
-    if ! command -v docker-compose &> /dev/null; then
+    if ! docker compose version &> /dev/null; then
         echo "❌ Docker Compose未安装，请先安装"
         exit 1
     fi
@@ -72,7 +72,7 @@ check_prerequisites() {
 
 build_images() {
     echo "🏗️  构建Docker镜像..."
-    docker-compose -f $COMPOSE_FILE build
+    docker compose -f $COMPOSE_FILE build
     echo "✅ 镜像构建完成"
 }
 
@@ -96,10 +96,10 @@ start_services() {
     # 选择profiles
     if [ "$with_demo" = "true" ]; then
         echo "🎭 启动完整环境 (包含CLI演示)"
-        docker-compose -f $COMPOSE_FILE --profile demo up -d
+        docker compose -f $COMPOSE_FILE --profile demo up -d
     else
         echo "🎯 启动基础服务"
-        docker-compose -f $COMPOSE_FILE up -d neo4j graphiti-mcp mcp-web-client
+        docker compose -f $COMPOSE_FILE up -d neo4j graphiti-mcp mcp-web-client
     fi
 
     echo ""
@@ -112,7 +112,7 @@ start_services() {
 
 stop_services() {
     echo "🛑 停止所有服务..."
-    docker-compose -f $COMPOSE_FILE down
+    docker compose -f $COMPOSE_FILE down
     echo "✅ 服务已停止"
 }
 
@@ -121,7 +121,7 @@ check_service_status() {
     echo ""
 
     # 检查容器状态
-    docker-compose -f $COMPOSE_FILE ps
+    docker compose -f $COMPOSE_FILE ps
 
     echo ""
     echo "🌐 服务地址："
@@ -152,10 +152,10 @@ show_logs() {
     local service=${1:-}
     if [ -z "$service" ]; then
         echo "📋 显示所有服务日志..."
-        docker-compose -f $COMPOSE_FILE logs --tail=50 -f
+        docker compose -f $COMPOSE_FILE logs --tail=50 -f
     else
         echo "📋 显示 $service 服务日志..."
-        docker-compose -f $COMPOSE_FILE logs --tail=50 -f "$service"
+        docker compose -f $COMPOSE_FILE logs --tail=50 -f "$service"
     fi
 }
 
