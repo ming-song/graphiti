@@ -23,10 +23,12 @@ from graphiti_core.edges import EntityEdge
 from graphiti_core.embedder.azure_openai import AzureOpenAIEmbedderClient
 from graphiti_core.embedder.client import EmbedderClient
 from graphiti_core.embedder.openai import OpenAIEmbedder, OpenAIEmbedderConfig
+from graphiti_core.embedder.gemini import GeminiEmbedder, GeminiEmbedderConfig
 from graphiti_core.llm_client import LLMClient
 from graphiti_core.llm_client.azure_openai_client import AzureOpenAILLMClient
 from graphiti_core.llm_client.config import LLMConfig
 from graphiti_core.llm_client.openai_client import OpenAIClient
+from graphiti_core.llm_client.gemini_client import GeminiClient
 from graphiti_core.nodes import EpisodeType, EpisodicNode
 from graphiti_core.search.search_config_recipes import (
     NODE_HYBRID_SEARCH_NODE_DISTANCE,
@@ -193,6 +195,7 @@ class GraphitiLLMConfig(BaseModel):
     """
 
     api_key: str | None = None
+    google_api_key: str | None = None
     model: str = DEFAULT_LLM_MODEL
     small_model: str = SMALL_LLM_MODEL
     temperature: float = 0.0
@@ -233,6 +236,7 @@ class GraphitiLLMConfig(BaseModel):
 
             return cls(
                 api_key=os.environ.get('OPENAI_API_KEY'),
+                google_api_key=os.environ.get('GOOGLE_API_KEY'),
                 model=model,
                 small_model=small_model,
                 temperature=float(os.environ.get('LLM_TEMPERATURE', '0.0')),
@@ -295,6 +299,19 @@ class GraphitiLLMConfig(BaseModel):
             LLMClient instance
         """
 
+        # Check if using Gemini models
+        if self.model.startswith('gemini'):
+            if not self.google_api_key:
+                raise ValueError('GOOGLE_API_KEY must be set when using Gemini API')
+
+            llm_client_config = LLMConfig(
+                api_key=self.google_api_key,
+                model=self.model,
+                small_model=self.small_model
+            )
+            llm_client_config.temperature = self.temperature
+            return GeminiClient(config=llm_client_config)
+
         if self.azure_openai_endpoint is not None:
             # Azure OpenAI API setup
             if self.azure_openai_use_managed_identity:
@@ -354,6 +371,7 @@ class GraphitiEmbedderConfig(BaseModel):
 
     model: str = DEFAULT_EMBEDDER_MODEL
     api_key: str | None = None
+    google_api_key: str | None = None
     azure_openai_endpoint: str | None = None
     azure_openai_deployment_name: str | None = None
     azure_openai_api_version: str | None = None
@@ -408,9 +426,18 @@ class GraphitiEmbedderConfig(BaseModel):
             return cls(
                 model=model,
                 api_key=os.environ.get('OPENAI_API_KEY'),
+                google_api_key=os.environ.get('GOOGLE_API_KEY'),
             )
 
     def create_client(self) -> EmbedderClient | None:
+        # Check if using Gemini embedding models
+        if self.model.startswith('text-embedding-') and self.google_api_key:
+            gemini_config = GeminiEmbedderConfig(
+                api_key=self.google_api_key,
+                embedding_model=self.model
+            )
+            return GeminiEmbedder(config=gemini_config)
+
         if self.azure_openai_endpoint is not None:
             # Azure OpenAI API setup
             if self.azure_openai_use_managed_identity:

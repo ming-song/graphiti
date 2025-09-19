@@ -1,0 +1,20 @@
+[project]
+name = "graphiti-mcp-client"
+version = "0.1.0"
+description = "Lightweight client to demonstrate Graphiti MCP Server features"
+readme = "README.md"
+requires-python = ">=3.10,<4"
+dependencies = [
+    "mcp>=1.5.0",
+]
+
+[project.scripts]
+graphiti-mcp-client = "mcp_client.graphiti_mcp_client:main"
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mcp_client*"]

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Memory Management</h1>
+        <p>Add new episodes to the knowledge graph.</p>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Add Memory</h5>
+            </div>
+            <div class="card-body">
+                <form id="addMemoryForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="episode_body" class="form-label">Episode Body</label>
+                        <textarea class="form-control" id="episode_body" rows="5" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="source" class="form-label">Source Type</label>
+                        <select class="form-select" id="source">
+                            <option value="text">Text</option>
+                            <option value="json">JSON</option>
+                            <option value="message">Message</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="source_description" class="form-label">Source Description</label>
+                        <input type="text" class="form-control" id="source_description">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="group_id" class="form-label">Group ID (optional)</label>
+                        <input type="text" class="form-control" id="group_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="uuid" class="form-label">UUID (optional)</label>
+                        <input type="text" class="form-control" id="uuid">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Add Memory</button>
+                </form>
+
+                <div id="addMemoryResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('addMemoryForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Adding...';
+
+    try {
+        const formData = {
+            name: document.getElementById('name').value,
+            episode_body: document.getElementById('episode_body').value,
+            source: document.getElementById('source').value,
+            source_description: document.getElementById('source_description').value,
+            group_id: document.getElementById('group_id').value || null,
+            uuid: document.getElementById('uuid').value || null
+        };
+
+        const response = await fetch('/api/add_memory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        const resultDiv = document.getElementById('addMemoryResult');
+
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>Success:</h6>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+            // Reset form
+            this.reset();
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6>Error:</h6>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        }
+    } catch (error) {
+        const resultDiv = document.getElementById('addMemoryResult');
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Connection Error:</h6>
+                <p>${error.message}</p>
+            </div>
+        `;
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Add Memory';
+    }
+});
+</script>
+{% endblock %}

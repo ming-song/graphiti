@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Graphiti MCP Client</h1>
+        <p class="lead">A web interface for interacting with the Graphiti MCP Server.</p>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Server Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Server URL:</strong> {{ server_url }}</p>
+                <p><strong>Transport:</strong> SSE</p>
+                <button id="checkStatus" class="btn btn-primary">Check Server Status</button>
+                <div id="statusResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <a href="/memory" class="btn btn-outline-primary">Add Memory</a>
+                        <a href="/search" class="btn btn-outline-primary">Search</a>
+                        <a href="/episodes" class="btn btn-outline-primary">View Episodes</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Available Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>Add Memory (text, JSON, message)</li>
+                            <li>Search Nodes</li>
+                            <li>Search Facts</li>
+                            <li>Get Episodes</li>
+                            <li>Delete Entity Edge</li>
+                            <li>Delete Episode</li>
+                            <li>Clear Graph</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('checkStatus').addEventListener('click', async function() {
+    const statusButton = this;
+    statusButton.disabled = true;
+    statusButton.textContent = 'Checking...';
+
+    try {
+        const response = await fetch('/api/status');
+        const result = await response.json();
+
+        const statusResult = document.getElementById('statusResult');
+        if (response.ok) {
+            statusResult.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>Server Status:</h6>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        } else {
+            statusResult.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6>Error:</h6>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        }
+    } catch (error) {
+        const statusResult = document.getElementById('statusResult');
+        statusResult.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Connection Error:</h6>
+                <p>${error.message}</p>
+            </div>
+        `;
+    } finally {
+        statusButton.disabled = false;
+        statusButton.textContent = 'Check Server Status';
+    }
+});
+</script>
+{% endblock %}

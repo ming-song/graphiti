@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>Episodes</h1>
+        <p>View and manage episodes in the knowledge graph.</p>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Get Episodes</h5>
+            </div>
+            <div class="card-body">
+                <form id="getEpisodesForm">
+                    <div class="mb-3">
+                        <label for="group_id" class="form-label">Group ID (optional)</label>
+                        <input type="text" class="form-control" id="group_id">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="last_n" class="form-label">Number of Episodes</label>
+                        <input type="number" class="form-control" id="last_n" value="10" min="1" max="100">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Get Episodes</button>
+                </form>
+
+                <div id="episodesResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('getEpisodesForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitButton = this.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Loading...';
+
+    try {
+        const formData = {
+            last_n: parseInt(document.getElementById('last_n').value),
+            group_id: document.getElementById('group_id').value || null
+        };
+
+        const response = await fetch('/api/get_episodes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        const resultDiv = document.getElementById('episodesResult');
+
+        if (response.ok) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>Episodes:</h6>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6>Error:</h6>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+            `;
+        }
+    } catch (error) {
+        const resultDiv = document.getElementById('episodesResult');
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Connection Error:</h6>
+                <p>${error.message}</p>
+            </div>
+        `;
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Get Episodes';
+    }
+});
+</script>
+{% endblock %}

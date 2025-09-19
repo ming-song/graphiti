@@ -166,3 +166,17 @@ cache.db*
 
 # All DS_Store files
 .DS_Store
+
+# MCP Client specific
+mcp_client/.venv/
+mcp_client_web/.venv/
+mcp_client/build/
+mcp_client_web/build/
+mcp_client/*.egg-info/
+mcp_client_web/*.egg-info/
+
+# Development environment
+graphiti_dev_env/
+
+# Temporary files
+start_web_client.sh

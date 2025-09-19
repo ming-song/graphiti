@@ -35,7 +35,10 @@ services:
       - NEO4J_USER=${NEO4J_USER:-neo4j}
       - NEO4J_PASSWORD=${NEO4J_PASSWORD:-demodemo}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - MODEL_NAME=${MODEL_NAME}
+      - SMALL_MODEL_NAME=${SMALL_MODEL_NAME}
+      - EMBEDDER_MODEL_NAME=${EMBEDDER_MODEL_NAME}
       - PATH=/root/.local/bin:${PATH}
       - SEMAPHORE_LIMIT=${SEMAPHORE_LIMIT:-10}
     ports:
