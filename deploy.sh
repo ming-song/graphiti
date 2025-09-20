@@ -126,25 +126,30 @@ check_service_status() {
     echo ""
     echo "🌐 服务地址："
 
+    # 获取端口号，使用环境变量或默认值
+    NEO4J_PORT=${NEO4J_HTTP_PORT:-7474}
+    MCP_PORT=${MCP_SERVER_PORT:-8000}
+    WEB_PORT=${WEB_CLIENT_PORT:-5000}
+
     # 检查Neo4j
-    if curl -s -m 2 http://localhost:7474 > /dev/null 2>&1; then
-        echo "✅ Neo4j Web界面:  http://localhost:7474"
+    if curl -s -m 2 http://localhost:$NEO4J_PORT > /dev/null 2>&1; then
+        echo "✅ Neo4j Web界面:  http://localhost:$NEO4J_PORT"
     else
-        echo "❌ Neo4j Web界面:  http://localhost:7474 (未运行)"
+        echo "❌ Neo4j Web界面:  http://localhost:$NEO4J_PORT (未运行)"
     fi
 
     # 检查MCP Server
-    if curl -s -m 2 http://localhost:8000/sse | grep -q "endpoint" 2>/dev/null; then
-        echo "✅ MCP Server:     http://localhost:8000"
+    if curl -s -m 2 http://localhost:$MCP_PORT/sse | grep -q "endpoint" 2>/dev/null; then
+        echo "✅ MCP Server:     http://localhost:$MCP_PORT"
     else
-        echo "❌ MCP Server:     http://localhost:8000 (未运行)"
+        echo "❌ MCP Server:     http://localhost:$MCP_PORT (未运行)"
     fi
 
     # 检查Web客户端
-    if curl -s -m 2 http://localhost:5000 | grep -q "html\|Graphiti" 2>/dev/null; then
-        echo "✅ Web客户端:      http://localhost:5000"
+    if curl -s -m 2 http://localhost:$WEB_PORT | grep -q "html\|Graphiti" 2>/dev/null; then
+        echo "✅ Web客户端:      http://localhost:$WEB_PORT"
     else
-        echo "❌ Web客户端:      http://localhost:5000 (未运行)"
+        echo "❌ Web客户端:      http://localhost:$WEB_PORT (未运行)"
     fi
 }
 
